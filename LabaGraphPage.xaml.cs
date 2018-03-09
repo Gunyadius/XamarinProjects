@@ -1,6 +1,7 @@
 ﻿using System;
 using Xamarin.Forms;
 using System.Collections.Generic;
+using System.Collections;
 using System.Threading.Tasks;
 using System.Threading;
 
@@ -15,7 +16,6 @@ namespace LabaGraph
         public Button Start;
         Double x = 0, y = 0;
         bool[] edgeNode = new bool[100];
-        int[,] main = new int[100, 100];
         AbsoluteLayout panel = new AbsoluteLayout();
         public Button[] arr = new Button[100];
         int counter = 0;
@@ -78,7 +78,7 @@ namespace LabaGraph
         {
             int[] current;
             int a = 0;
-            current = mainGraph.BFS();
+            current = mainGraph.DFS();
             Device.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
                 if (a == current.Length)
@@ -236,6 +236,38 @@ namespace LabaGraph
                         used[i] = true;
                     }
                 }
+            }
+            return local;
+        }
+        public int[] DFS()
+        {
+            int[] local = new int[size];
+            int q = 0;
+            Random rand = new Random();
+            var stack = new Stack<int>();
+            int cur = rand.Next(0, size);
+            bool[] used = new bool[size];
+            used[cur] = true;
+            stack.Push(cur);
+            local[q] = cur;
+            q++;
+            while (stack.Count !=0)
+            {
+                cur = stack.Peek();
+                int i = 0;
+                while(stack.Peek()==cur && i<size)
+                {
+                    if (graph[cur,i]!=0 && !used[i])
+                    {
+                        stack.Push(i);
+                        used[i] = true;
+                        local[q] = i;
+                        q++;
+                    }
+                    i++;
+                }
+                if (stack.Peek() == cur)
+                    stack.Pop();
             }
             return local;
         }
