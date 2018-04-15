@@ -12,30 +12,42 @@ namespace LabaGraph
 {
     public partial class LabaGraphPage : ContentPage
     {
-        // public Button Create;
+        public Button Create;
         public Button Edit;
         public Button Finish;
         public Button Start;
         Double x = 0, y = 0;
         bool[] edgeNode = new bool[100];
         AbsoluteLayout panel = new AbsoluteLayout();
-        public Image[] arr = new Image[100];
+        public Node[] arr = new Node[100];
         int counter = 0;
-        public int j, o, cur;
+        public int j,o,c,p,first,second;
         public Graph mainGraph = new Graph();
-        PanGestureRecognizer panGesture = new PanGestureRecognizer();
-
+        public PanGestureRecognizer panGesture = new PanGestureRecognizer();
+        public TapGestureRecognizer tapGesture = new TapGestureRecognizer();
+        string temp;
         public LabaGraphPage()
         {
-           // var image = new CircleImage { Source = ImageSource.FromUri(new Uri("https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Felis_silvestris_silvestris_small_gradual_decrease_of_quality.png/240px-Felis_silvestris_silvestris_small_gradual_decrease_of_quality.png")) };
-           // panel.Children.Add(image);
-           // image.GestureRecognizers.Add(panGesture);
-           // image.HeightRequest = 500;
-           // image.WidthRequest = 500;
-            BackgroundColor = Color.Chocolate;
+            
+            for (int e = 0; e < 20; e++)
+            {
+                temp="LabaGraph.ImagesOfNumbers."+e.ToString()+".jpg";
+                arr[e] = new Node();
+                arr[e].image = new CircleImage();
+                arr[e].image.Source = ImageSource.FromResource(temp);
+            }
+          /*  arr[0].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.0.jpg");
+            arr[1].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.1.jpg");
+            arr[2].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.2.jpg");
+            arr[3].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.3.jpg");
+            arr[4].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.4.jpg");
+            arr[5].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.5.jpg");
+            arr[6].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.6.jpg");
+            arr[7].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.7.jpg");
+            arr[0].image.Source = ImageSource.FromResource("LabaGraph.ImagesOfNumbers.0.jpg");*/
+            BackgroundColor = Color.LimeGreen;
             Padding = new Thickness(20);
-           // image.Aspect = Aspect.AspectFill;
-            var Create = new Button
+            Create = new Button()
             {
                 Text = "Create a node",
                 BackgroundColor = Color.DarkRed,
@@ -43,7 +55,6 @@ namespace LabaGraph
                 TextColor = Color.Yellow,
             };
             panel.Children.Add(Create);
-          //  Create.GestureRecognizers.Add(panGesture);
             panel.Children.Add(Edit = new Button()
             {
                 Text = "Edit Graph",
@@ -72,18 +83,10 @@ namespace LabaGraph
             AbsoluteLayout.SetLayoutBounds(Finish, new Rectangle(240, 65, 110, 40));
             Create.Clicked += CreateNode;
             Edit.Clicked += EditGraph;
-            panGesture.PanUpdated += OnPanUpdated;
-            for (int w = 0; w < counter; w++)
-            {
-                if (arr[w] != null)
-                    arr[w].GestureRecognizers.Add(panGesture);
-            }
             Finish.Clicked += FinishEdit;
             this.Content = panel;
             Start.Clicked += GraphAnime;
-            //  Content.GestureRecognizers.Add(panGesture);
         }
-
         void GraphAnime(object sender, EventArgs e)
         {
             int[] current;
@@ -97,7 +100,8 @@ namespace LabaGraph
                 }
                 else
                 {
-                    arr[current[a]].BackgroundColor = Color.OrangeRed;
+                    temp="LabaGraph.InvertedNumbers." + current[a].ToString() + ".jpg";
+                    arr[current[a]].image.Source=ImageSource.FromResource(temp);
                     a++;
                     return true;
                 }
@@ -109,124 +113,144 @@ namespace LabaGraph
         {
             Finish.IsVisible = false;
             Finish.IsEnabled = false;
-            // for (int a = 0; a < counter; a++)
-            //     arr[a].IsEnabled = false;
-        }
-
-
-        void ButtonOnClick(object sender, EventArgs eventArgs)
-        {
-            var button = sender as Button;
-            if (button != null)
-            {
-                cur = Int32.Parse(button.Text);
-                edgeNode[cur] = true;
-                for (o = 0; o < counter - 1; o++)
-                {
-                    if (o != cur && edgeNode[o])
-                    {
-                        this.DisplayAlert("Alert", "You created an edge", "OK");
-                        mainGraph.graph[cur, o] = 1;
-                        mainGraph.graph[o, cur] = 1;
-                        SKCanvasView canvasView = new SKCanvasView();
-                        canvasView.PaintSurface += OnCanvasViewPaintSurface;
-                        //    panel.Children.Add(canvasView);
-                        this.Content = panel;
-                        //  button.BackgroundColor = Color.DarkOrange;
-                        //  arr[i].BackgroundColor = Color.DarkOrange;
-                        for (int z = 0; z < counter; z++)
-                            edgeNode[z] = false;
-                    }
-                }
-            }
         }
         public void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs args)
         {
             SKImageInfo info = args.Info;
             SKSurface surface = args.Surface;
             SKCanvas canvas = surface.Canvas;
-
             canvas.Clear();
 
             SKPaint linePaint = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
-                Color = SKColors.Yellow,
+                Color = SKColors.White,
                 StrokeWidth = 20
             };
             linePaint.StrokeCap = SKStrokeCap.Round;
-
-            canvas.DrawLine((float)arr[cur].X + 20, (float)arr[cur].Y + 20, (float)arr[o].X + 20, (float)arr[o].Y + 20, linePaint);
+            canvas.DrawLine(((float)arr[first].x + 20+50*(first/9))*2, ((float)arr[first].y + 20 + 50 * (first % 9))*2 , ((float)arr[second].x + 20+50*(second/9))*2 , ((float)arr[second].y + 20 + 50 * (second % 9))*2 , linePaint);
 
         }
 
         public void EditGraph(object sender, EventArgs e)
         {
-            for (int i = 0; i < counter; i++)
-            {
-                arr[i].IsEnabled = true;
-            }
-            // Create.IsVisible = false;
-            // Create.IsEnabled = false;
+
+            Create.IsVisible = false;
+            Create.IsEnabled = false;
             Edit.IsVisible = false;
             Edit.IsEnabled = false;
             Finish.IsVisible = true;
             Finish.IsEnabled = true;
             mainGraph = new Graph(counter);
-          /*      for (j = 0; j < counter; j++)
+            tapGesture.Tapped += OnTapDetected;
+            for (c = 0; c <= counter; c++)
+            {
+                if (arr[c].image != null)
                 {
-                    arr[j].Clicked += ButtonOnClick;
-                }*/
-            }
-
-
-            void CreateNode(object sender, EventArgs e)
-            {
-            arr[counter] = new CircleImage()
-            {
-                WidthRequest = 40,
-                HeightRequest = 40,
-                Source = ImageSource.FromUri(new Uri("https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Felis_silvestris_silvestris_small_gradual_decrease_of_quality.png/240px-Felis_silvestris_silvestris_small_gradual_decrease_of_quality.png")),
-                Aspect = Aspect.Fill,
-                };
-                panel.Children.Add(arr[counter]);
-                AbsoluteLayout.SetLayoutBounds(arr[counter], new Rectangle(x, y, 40, 40));
-            for (int x = 0; x <=counter;x++)
-            {
-                if (arr[x] != null)
-                    arr[x].GestureRecognizers.Add(panGesture);
-            }
-                if (y == 400)
-                {
-                    y = 0;
-                    x += 50;
-                }
-                else
-                    y += 50;
-                counter++;
-            }
-
-
-
-            void OnPanUpdated(object sender, PanUpdatedEventArgs e)
-            {
-                var button = sender as Image;
-                switch (e.StatusType)
-                {
-                    case GestureStatus.Running:
-                        button.TranslationX =
-                            Math.Max(x + e.TotalX, -Math.Abs(button.Width - Application.Current.MainPage.Width));
-                        button.TranslationY =
-                                  Math.Max(y + e.TotalY, -Math.Abs(button.Height - Application.Current.MainPage.Height));
-                        break;
-
-                    case GestureStatus.Completed:
-                    x = e.TotalX;
-                    y = e.TotalY;
-                        break;
+                    arr[c].image.GestureRecognizers.Add(tapGesture);
                 }
             }
         }
+
+
+        void CreateNode(object sender, EventArgs e)
+        {
+            arr[counter].image.WidthRequest = 40;
+            arr[counter].image.HeightRequest = 40;
+           // arr[counter].x = x*2;
+           // arr[counter].y = y*2;
+            // Source = ImageSource.FromUri(new Uri("https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Felis_silvestris_silvestris_small_gradual_decrease_of_quality.png/240px-Felis_silvestris_silvestris_small_gradual_decrease_of_quality.png")),
+            arr[counter].image.Aspect = Aspect.Fill;
+            panel.Children.Add(arr[counter].image);
+            AbsoluteLayout.SetLayoutBounds(arr[counter].image, new Rectangle(x, y, 40, 40));
+            panGesture.PanUpdated += OnPanUpdated;
+            for (c = 0; c <= counter; c++)
+            {
+                if (arr[c].image != null)
+                {
+                    arr[c].image.GestureRecognizers.Add(panGesture);
+                }
+            }
+            if (y == 400)
+            {
+                y = 0;
+                x += 50;
+            }
+            else
+                y += 50;
+            counter++;
+        }
+        public void OnTapDetected(object sender ,EventArgs e)
+        {
+            var obj = sender as Image;
+            for (p = 0; p < counter; p++)
+            {
+                if (obj.Equals(arr[p].image))
+                {
+                    edgeNode[p] = true;
+                    for (o = 0; o < counter; o++)
+                    {
+                        if (o != p && edgeNode[o])
+                        {
+                            this.DisplayAlert("Alert", "You created an edge", "OK");
+                            mainGraph.graph[p, o] = 1;
+                            mainGraph.graph[o, p] = 1;
+                            first = o;
+                            second = p;
+                            SKCanvasView canvasView = new SKCanvasView();
+                            canvasView.HeightRequest = Application.Current.MainPage.Height;
+                            canvasView.WidthRequest = Application.Current.MainPage.Width;
+                            canvasView.PaintSurface += OnCanvasViewPaintSurface;
+                            panel.Children.Add(canvasView);
+                            for (int z = 0; z < counter; z++)
+                                edgeNode[z] = false;
+                            for (int z = 0; z < counter; z++)
+                                panel.RaiseChild(arr[z].image);
+                            panel.RaiseChild(Finish);
+                            panel.RaiseChild(Start);
+                        }
+                    }
+                }
+            }
+        }
+        public void OnPanUpdated(object sender, PanUpdatedEventArgs e)
+        {
+            for (int p = 0; p < counter; p++)
+            {
+                if (sender.Equals(arr[p].image))
+                {
+                    var obj = sender as CircleImage;
+                    switch (e.StatusType)
+                    {
+                        case GestureStatus.Running:
+
+                            arr[p].image.TranslationX = 
+                               Math.Max(arr[p].x + e.TotalX, -Math.Abs(arr[p].image.Width - Application.Current.MainPage.Width));
+                            arr[p].image.TranslationY = 
+                                Math.Max(arr[p].y + e.TotalY, -Math.Abs(arr[p].image.Width - Application.Current.MainPage.Height));
+                            break;
+
+                        case GestureStatus.Completed:
+                            arr[p].y = arr[p].image.TranslationY;
+                            arr[p].x = arr[p].image.TranslationX;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    public class Node
+    {
+        public double x, y;
+        public CircleImage image;
+        public Node()
+        {
+            for (int i = 0; i < 100;i++)
+            {
+                this.image=new CircleImage();
+            }
+        }
+    }
 
 
 
